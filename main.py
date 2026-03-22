@@ -14,6 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Crée les tables si elles n'existent pas encore
 models.Base.metadata.create_all(bind=engine)
 
 def get_db():
@@ -23,17 +24,17 @@ def get_db():
     finally:
         db.close()
 
-# --- 1. ROUTES DE RECHERCHE ET FILTRE (DOIVENT ÊTRE EN HAUT) ---
+# --- 1. ROUTES DE RECHERCHE ET FILTRE ---
 
 @app.get("/articles/search")
 def search_article(query: str, db: Session = Depends(get_db)):
-    # Utilisation de .ilike pour une recherche insensible à la casse
+    # OPTIMISATION POSTGRES : .ilike(f"%{query}%") est la vraie méthode pour ignorer la casse
     return db.query(models.Article).filter(
-        (models.Article.titre.contains(query)) | 
-        (models.Article.contenu.contains(query))
+        (models.Article.titre.ilike(f"%{query}%")) | 
+        (models.Article.contenu.ilike(f"%{query}%"))
     ).all()
 
-@app.get("/articles/filter") # Corrigé /article -> /articles
+@app.get("/articles/filter")
 def filter_articles(categorie: str, db: Session = Depends(get_db)):
     return db.query(models.Article).filter(models.Article.categorie == categorie).all()
 
@@ -41,7 +42,8 @@ def filter_articles(categorie: str, db: Session = Depends(get_db)):
 
 @app.post("/articles", response_model=shemas.ArticleReponse)
 def create_article(article: shemas.ArticleCreate, db: Session = Depends(get_db)):
-    new_article = models.Article(**article.dict())
+    # OPTIMISATION PYDANTIC V2 : model_dump() remplace dict()
+    new_article = models.Article(**article.model_dump())
     db.add(new_article)
     db.commit()
     db.refresh(new_article)
@@ -51,13 +53,13 @@ def create_article(article: shemas.ArticleCreate, db: Session = Depends(get_db))
 def get_articles(db: Session = Depends(get_db)):
     return db.query(models.Article).all()
 
-# --- 3. ROUTES AVEC ID (À LA FIN) ---
+# --- 3. ROUTES AVEC ID ---
 
 @app.get("/articles/{id}", response_model=shemas.ArticleReponse)
 def get_article(id: int, db: Session = Depends(get_db)):
-    article = db.query(models.Article).filter(models.Article.id == id).first() # .filter corrigé
+    article = db.query(models.Article).filter(models.Article.id == id).first()
     if not article:
-        raise HTTPException(status_code=404, detail="Article non trouvé") # raise sur une ligne
+        raise HTTPException(status_code=404, detail="Article non trouvé")
     return article
     
 @app.put("/articles/{id}")
@@ -66,19 +68,20 @@ def update_article(id: int, article: shemas.ArticleCreate, db: Session = Depends
     if not db_article:
         raise HTTPException(status_code=404, detail="Article non trouvé")
     
-    for key, value in article.dict().items():
+    # OPTIMISATION PYDANTIC V2 : model_dump() remplace dict()
+    for key, value in article.model_dump().items():
         setattr(db_article, key, value)
     
-    db.commit() # Commit après la boucle
+    db.commit()
     db.refresh(db_article)
     return {"message": "Article modifié"}
 
-@app.delete("/articles/{id}") # "artilces" corrigé en "articles"
+@app.delete("/articles/{id}")
 def delete_article(id: int, db: Session = Depends(get_db)):
     article = db.query(models.Article).filter(models.Article.id == id).first()
     if not article:
         raise HTTPException(status_code=404, detail="Article non trouvé")
     
-    db.delete(article) # Ajout de la suppression effective
+    db.delete(article)
     db.commit()
     return {"message": "Article supprimé"}
