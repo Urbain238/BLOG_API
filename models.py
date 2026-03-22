@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String
-from database import Base 
+from sqlalchemy import Column, Integer, String, Text
+from database import Base
 
 class Article(Base):
     __tablename__ = "articles"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    id = Column(Integer, primary_key=True, index=True)
     titre = Column(String(255), nullable=False)
-    contenu = Column(String(1000))
+    contenu = Column(Text, nullable=False)
     categorie = Column(String(100))
     auteur = Column(String(100))
-    tags = Column(String(255))
-    
+    tags = Column(Text)
