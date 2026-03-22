@@ -182,3 +182,140 @@ def search_articles(query: str, db: Session = Depends(get_db)):
     
     return resultats
 ```
+## 2. Côté Client (Frontend) : Interface Dynamique en Vanilla JS
+
+L'interface utilisateur a été conçue comme une **Single Page Application (SPA)**. Pour garantir une application légère et consolider la compréhension des fondamentaux du web, aucun framework frontend (comme React ou Vue) n'a été utilisé. Toute la logique repose sur **HTML5, CSS3 et Vanilla JavaScript**.
+
+Le frontend gère l'affichage asynchrone des données, l'interaction utilisateur via des fenêtres modales, et un traitement complexe des médias (images locales en Base64 et liens externes).
+
+Voici le détail des implémentations techniques majeures :
+
+### 🔗 2.1. Communication avec l'API (Fetch API)
+L'application communique avec le backend FastAPI en utilisant l'API `fetch` native avec la syntaxe moderne `async/await`. 
+
+**Exemple : Chargement initial des articles (`GET`)**
+La fonction `load()` interroge le serveur et met à jour le DOM en cas de succès, ou affiche un message d'erreur si le serveur est injoignable.
+
+```javascript
+const API_BASE_URL = '[https://blog-api-ultime-version.vercel.app](https://blog-api-ultime-version.vercel.app)';
+const API = `${API_BASE_URL}/articles`;
+
+let store = []; // Stockage local des articles pour éviter les requêtes redondantes
+
+async function load() {
+    try {
+        const response = await fetch(API);
+        if (!response.ok) throw new Error("Erreur de réponse serveur");
+        
+        store = await response.json();
+        render(store); // Appel de la fonction de rafraîchissement de l'interface
+    } catch (erreur) {
+        console.error("Erreur de chargement:", erreur);
+        document.getElementById('mainGrid').innerHTML = "<p>Le serveur n'est pas joignable.</p>";
+    }
+}
+```
+
+### 2.2. Rendu Dynamique et Manipulation du DOM
+La fonction `render(data)` prend le tableau d'articles et génère dynamiquement des cartes HTML (Cards) en injectant les données via des *Template Literals* (littéraux de gabarits). 
+
+Pour garder des cartes propres, une logique d'extraction de texte (Retrait des balises HTML) et de limitation de caractères (Substring) est appliquée au contenu.
+
+```javascript
+function render(data) {
+    const grille = document.getElementById('mainGrid');
+    
+    grille.innerHTML = data.slice().reverse().map(article => {
+        // Nettoyage du contenu HTML pour générer l'extrait de texte
+        const texteBrut = article.contenu ? article.contenu.replace(/<[^>]*>?/gm, '') : '';
+        const extrait = texteBrut.substring(0, 100) + (texteBrut.length > 100 ? '...' : '');
+
+        return `
+        <div class="card">
+            <h3 class="card-title">${article.titre}</h3>
+            <p class="card-text">${extrait}</p>
+            <button onclick="openView(${article.id})">Lire l'article</button>
+        </div>`;
+    }).join('');
+}
+```
+
+### 2.3. Gestion Avancée des Images (Base64 et Carrousel)
+L'un des défis majeurs de ce TP a été la gestion des images. L'utilisateur peut soit renseigner des URLs, soit uploader une image depuis son appareil (convertie en **Base64** par un `FileReader`).
+
+**A. Conversion des fichiers locaux en Base64 :**
+```javascript
+function insertImage() {
+    const imgFile = document.getElementById('imgFile').files[0];
+    const contenu = document.getElementById('contenu');
+
+    if (imgFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result;
+            // Injection de la balise image directement dans le contenu HTML
+            contenu.value += `\n<img src="${base64}" alt="Image locale"/>\n`;
+        };
+        reader.readAsDataURL(imgFile);
+    }
+}
+```
+
+**B. Génération de la miniature et du carrousel intelligent :**
+Lors de l'affichage d'un article, un algorithme fouille le contenu HTML pour en extraire les balises `<img>` générées précédemment, et les combine avec les URLs du carrousel pour créer une galerie unifiée.
+
+```javascript
+// Extraction dynamique des images cachées dans le contenu pour le carrousel
+const tempDiv = document.createElement('div');
+tempDiv.innerHTML = article.contenu;
+const imagesInContent = tempDiv.querySelectorAll('img');
+
+let allImages = article.images_urls ? [...article.images_urls] : [];
+
+// Fusion des images du contenu avec celles de l'entête
+imagesInContent.forEach(img => {
+    if (!allImages.includes(img.src)) {
+        allImages.push(img.src);
+    }
+});
+```
+
+### 2.4. Création et Mise à Jour (Opérations de Sauvegarde)
+La fonction `save()` est intelligente : elle vérifie si le champ caché `artId` est rempli. S'il y a un ID, elle effectue une requête `PUT` (modification). Sinon, elle fait un `POST` (création).
+
+```javascript
+async function save() {
+    const id = document.getElementById('artId').value;
+    const body = {
+        titre: document.getElementById('titre').value,
+        contenu: document.getElementById('contenu').value,
+        // ... autres champs
+    };
+
+    const urlFinal = id ? `${API}/${id}` : API;
+    const methodFinal = id ? 'PUT' : 'POST';
+
+    const res = await fetch(urlFinal, {
+        method: methodFinal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+        closeModal();
+        load(); // Rafraîchissement automatique de la grille
+    }
+}
+```
+
+### 2.5. Expérience Utilisateur (UX) : Mode Sombre
+Un script gère le basculement entre le mode clair et le mode sombre en ajoutant ou retirant une classe `dark-mode` sur la balise `<body>`. Les couleurs sont gérées par des variables CSS (`--bg-color`, `--text-color`).
+
+```javascript
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    // Changement de l'icône du bouton
+    document.getElementById('tBtn').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+```
