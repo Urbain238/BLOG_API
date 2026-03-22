@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy.dialects.postgresql import ARRAY
 from database import Base
 
 class Article(Base):
@@ -10,3 +11,4 @@ class Article(Base):
     categorie = Column(String(100))
     auteur = Column(String(100))
     tags = Column(Text)
+    images_urls = Column(ARRAY(String), default=[])
