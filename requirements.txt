@@ -1,0 +1,5 @@
+fastapi==0.111.1
+uvicorn==0.23.2
+sqlachemy==2.0.22
+pymysql==1.1.1
+pydantic==2.5.1
