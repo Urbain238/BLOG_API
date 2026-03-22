@@ -6,12 +6,12 @@ from database import engine, sessionLocal
 
 app = FastAPI(title="Urban Blog API")
 
-# --- CONFIGURATION CORS (CORRIGÉE) ---
+# --- CONFIGURATION CORS (MAXIMALE) ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=False, # Impératif pour éviter le "Serveur injoignable"
-    allow_methods=["*"],
+    allow_origins=["*"],  # Autorise tous les domaines (Github, Vercel, Local)
+    allow_credentials=False, # Désactivé car on utilise "*"
+    allow_methods=["*"], 
     allow_headers=["*"],
 )
 
