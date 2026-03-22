@@ -36,7 +36,7 @@ Voici le détail de l'architecture backend, étape par étape :
 ### 🗄️ 1.1. Connexion à la Base de Données (`database.py`)
 L'application utilise SQLAlchemy pour se connecter à la base de données PostgreSQL. Une session de base de données (`SessionLocal`) est créée pour chaque requête, garantissant que les transactions sont gérées de manière isolée et sécurisée.
 
-```python
+```
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -59,4 +59,6 @@ def get_db():
     try:
         yield db
     finally:
-        db.close()
+        db.close()```
+
+lllllll lll
