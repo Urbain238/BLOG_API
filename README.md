@@ -24,3 +24,39 @@ Pour répondre à ces exigences et garder un contrôle total sur la logique de l
 * **API RESTful :** Une architecture basée sur des routes HTTP (`GET`, `POST`, `PUT`, `DELETE`) pour manipuler la ressource "articles".
 * **Déploiement (Vercel) :** L'API et le système de persistance des données ont été hébergés sur Vercel (`https://blog-api-ultime-version.vercel.app/articles`), garantissant une disponibilité continue pour le frontend.
 * **Framework utilisisé :** FastAPI en langage python
+
+  ## 1. Côté Serveur : API RESTful avec FastAPI & PostgreSQL
+
+Pour gérer la logique métier et la persistance des données, le backend a été développé en **Python** avec le framework **FastAPI**. Ce choix a été motivé par sa rapidité, sa génération automatique de documentation (Swagger) et sa validation des données via **Pydantic**. 
+
+La persistance des données est assurée par une base de données **PostgreSQL**, manipulée via l'ORM **SQLAlchemy**.
+
+Voici le détail de l'architecture backend, étape par étape :
+
+### 🗄️ 1.1. Connexion à la Base de Données (`database.py`)
+L'application utilise SQLAlchemy pour se connecter à la base de données PostgreSQL. Une session de base de données (`SessionLocal`) est créée pour chaque requête, garantissant que les transactions sont gérées de manière isolée et sécurisée.
+
+```python
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+# URL de connexion à la base de données PostgreSQL
+SQLALCHEMY_DATABASE_URL = "postgresql://user:password@host/dbname"
+
+# Création du moteur de base de données
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
+# Création d'une session locale pour interagir avec la DB
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Classe de base pour la création des modèles
+Base = declarative_base()
+
+# Dépendance pour obtenir la session de DB dans les routes
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
