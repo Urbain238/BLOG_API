@@ -1,13 +1,26 @@
 ******************************************************************************************************************************************
 # INTRODUCTION
 ******************************************************************************************************************************************
-À l'ère de la numérisation croissante et de la diffusion instantanée de l'information, la création de contenu web nécessite des outils à la fois robustes, agiles et profondément centrés sur l'expérience utilisateur. Si l'écosystème du développement web foisonne aujourd'hui de frameworks complexes, une problématique d'ingénierie fondamentale persiste : **comment concevoir une application web complète, réactive et performante tout en maîtrisant la complexité et en s'appuyant sur les technologies natives ?**
 
-C'est dans cette perspective que s'inscrit le projet **Matrice Blog**. Ce travail présente la conception, l'architecture et l'implémentation d'une plateforme Full-Stack de publication d'articles entièrement autonome. L'objectif de ce projet est de démontrer la viabilité d'un écosystème découplé, garantissant une communication fluide entre une interface client asynchrone et un serveur de données centralisé.
+Ce dépôt contient le code source et la documentation de mon projet réalisé dans le cadre de mo Travaux Pratiques de d'une API. L'objectif principal de ce TP était de concevoir, développer et déployer une API complète (Full-Stack optionelle) dédiée à la gestion et à la publication d'articles.
 
-Pour répondre à cette problématique, le projet a été structuré autour de deux axes architecturaux majeurs :
+Il était question de mettre en pratique l'architecture client-serveur en créant une **Single Page Application** capable de communiquer de manière asynchrone avec une **API REST**. 
 
-1. **Le Backend (API RESTful) :** Déployé via Vercel, il constitue le moteur logique de l'application. Conçu pour être léger et hautement disponible, il expose une série d'endpoints permettant de gérer de manière sécurisée les opérations de création, lecture, mise à jour et suppression (CRUD) des ressources (articles, métadonnées, images).
-2. **Le Frontend (Interface Utilisateur) :** Développée selon le paradigme des *Single Page Applications* (SPA) en utilisant exclusivement HTML, CSS et Vanilla JavaScript. L'interface s'affranchit des rechargements de page classiques en consommant l'API via des requêtes asynchrones (`fetch`). Elle intègre des fonctionnalités avancées telles qu'un moteur de recherche en temps réel, la gestion dynamique et conditionnelle des médias (extraction de données Base64 et URLs vers un carrousel interactif), ainsi qu'une adaptation thématique (Mode Sombre/Clair) pour l'ergonomie de lecture.
+Les défis techniques à relever incluaient :
+* La mise en place d'un système CRUD (Création, Lecture, Modification, Suppression) complet.
+* La gestion asynchrone des données sans rechargement de la page.
+* La conception d'une interface utilisateur fluide, responsive et ergonomique (incluant un mode sombre/clair et un carrousel d'images) - optionelle.
 
-Ce dépôt documente l'ensemble de cette architecture logicielle, les choix techniques adoptés, ainsi que les instructions nécessaires au déploiement et à la prise en main de cet environnement.
+## 2. Méthodologie et Outils Utilisés
+
+Pour répondre à ces exigences et garder un contrôle total sur la logique de l'application, j'ai opté pour des technologies natives couplées à des outils modernes de déploiement :
+
+### 🖥️ Côté Client (Frontend)
+* **HTML5 / CSS3 :** Structuration sémantique et design responsive sous forme de grille (CSS Grid/Flexbox) avec un système de fenêtres modales personnalisées.
+* **JavaScript:** Toute la logique applicative a été codée en JS natif (sans framework comme React ou Vue), afin de consolider la manipulation du DOM et la gestion des événements.
+* **Fetch API :** Utilisation des promesses (`async/await`) pour consommer les données de l'API.
+
+### ⚙️ Côté Serveur (Backend)
+* **API RESTful :** Une architecture basée sur des routes HTTP (`GET`, `POST`, `PUT`, `DELETE`) pour manipuler la ressource "articles".
+* **Déploiement (Vercel) :** L'API et le système de persistance des données ont été hébergés sur Vercel (`https://blog-api-ultime-version.vercel.app/articles`), garantissant une disponibilité continue pour le frontend.
+* **Framework utilisisé :** FastAPI en langage python
