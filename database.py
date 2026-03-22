@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = "mysql+pymysql://avnadmin:AVNS_1bEC-OGyJtQnF6sG6ep@mysql-181aa1f2-facsciences-c2d9.i.aivencloud.com:18684/defaultdb?ssl-mode=REQUIRED"
+# CORRECTION : On a changé "ssl-mode" en "ssl_mode" à la toute fin de l'URL
+DATABASE_URL = "mysql+pymysql://avnadmin:AVNS_1bEC-OGyJtQnF6sG6ep@mysql-181aa1f2-facsciences-c2d9.i.aivencloud.com:18684/defaultdb?ssl_mode=REQUIRED"
 
 engine = create_engine(DATABASE_URL)
 
