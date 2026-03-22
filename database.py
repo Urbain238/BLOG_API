@@ -1,9 +1,15 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# CORRECTION : On a changé "ssl-mode" en "ssl_mode" à la toute fin de l'URLs
-DATABASE_URL = "mysql+pymysql://avnadmin:AVNS_1bEC-OGyJtQnF6sG6ep@mysql-181aa1f2-facsciences-c2d9.i.aivencloud.com:18684/defaultdb?ssl_mode=REQUIRED"
+# On récupère l'URL de connexion que Vercel a créée automatiquement
+DATABASE_URL = os.getenv("POSTGRES_URL")
 
+# Petite correction obligatoire : SQLAlchemy a besoin de "postgresql://" et non "postgres://"
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# Connexion à la base de données Neon sur Vercel
 engine = create_engine(DATABASE_URL)
 
 sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
