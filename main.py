@@ -1,22 +1,24 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-import models, shemas
-from database import engine, sessionLocal 
 from fastapi.middleware.cors import CORSMiddleware
+import models, shemas # On garde ton orthographe "shemas"
+from database import engine, sessionLocal 
 
-app = FastAPI()
+app = FastAPI(title="Urban Blog API")
 
+# --- CONFIGURATION CORS (CORRIGÉE) ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
-    allow_credentials=True,
+    allow_credentials=False, # Impératif pour éviter le "Serveur injoignable"
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Crée les tables si elles n'existent pas encore
+# Création automatique des tables
 models.Base.metadata.create_all(bind=engine)
 
+# Dépendance pour la base de données
 def get_db():
     db = sessionLocal()
     try:
@@ -24,60 +26,62 @@ def get_db():
     finally:
         db.close()
 
-# --- 1. ROUTES DE RECHERCHE ET FILTRE ---
+# --- 1. ROUTES DE RECHERCHE ---
 
 @app.get("/articles/search")
 def search_article(query: str, db: Session = Depends(get_db)):
-    # OPTIMISATION POSTGRES : .ilike(f"%{query}%") est la vraie méthode pour ignorer la casse
+    """Recherche des articles par titre ou contenu (insensible à la casse)"""
     return db.query(models.Article).filter(
         (models.Article.titre.ilike(f"%{query}%")) | 
         (models.Article.contenu.ilike(f"%{query}%"))
     ).all()
 
-@app.get("/articles/filter")
-def filter_articles(categorie: str, db: Session = Depends(get_db)):
-    return db.query(models.Article).filter(models.Article.categorie == categorie).all()
+# --- 2. ROUTES STANDARDS (CRUD) ---
 
-# --- 2. ROUTES STANDARDS ---
+@app.get("/articles", response_model=list[shemas.ArticleReponse])
+def get_articles(db: Session = Depends(get_db)):
+    """Récupère tous les articles"""
+    return db.query(models.Article).all()
 
 @app.post("/articles", response_model=shemas.ArticleReponse)
 def create_article(article: shemas.ArticleCreate, db: Session = Depends(get_db)):
-    # OPTIMISATION PYDANTIC V2 : model_dump() remplace dict()
+    """Crée un nouvel article avec le support images_urls"""
+    # model_dump() extrait les données du schéma (incluant images_urls s'il est présent)
     new_article = models.Article(**article.model_dump())
     db.add(new_article)
     db.commit()
     db.refresh(new_article)
     return new_article
 
-@app.get("/articles", response_model=list[shemas.ArticleReponse])
-def get_articles(db: Session = Depends(get_db)):
-    return db.query(models.Article).all()
-
-# --- 3. ROUTES AVEC ID ---
+# --- 3. ROUTES AVEC ID (PLOTS EN DERNIER) ---
 
 @app.get("/articles/{id}", response_model=shemas.ArticleReponse)
 def get_article(id: int, db: Session = Depends(get_db)):
+    """Récupère un article spécifique"""
     article = db.query(models.Article).filter(models.Article.id == id).first()
     if not article:
         raise HTTPException(status_code=404, detail="Article non trouvé")
     return article
-    
+
 @app.put("/articles/{id}")
 def update_article(id: int, article: shemas.ArticleCreate, db: Session = Depends(get_db)):
+    """Met à jour un article"""
     db_article = db.query(models.Article).filter(models.Article.id == id).first()
     if not db_article:
         raise HTTPException(status_code=404, detail="Article non trouvé")
     
-    # OPTIMISATION PYDANTIC V2 : model_dump() remplace dict()
-    for key, value in article.model_dump().items():
+    # Mise à jour dynamique des champs (titre, contenu, auteur, images_urls, etc.)
+    update_data = article.model_dump()
+    for key, value in update_data.items():
         setattr(db_article, key, value)
     
     db.commit()
     db.refresh(db_article)
-    return {"message": "Article modifié"}
+    return {"message": "Article modifié avec succès", "id": id}
 
 @app.delete("/articles/{id}")
 def delete_article(id: int, db: Session = Depends(get_db)):
+    """Supprime un article"""
     article = db.query(models.Article).filter(models.Article.id == id).first()
     if not article:
         raise HTTPException(status_code=404, detail="Article non trouvé")
