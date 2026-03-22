@@ -319,3 +319,17 @@ function toggleTheme() {
     document.getElementById('tBtn').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 }
 ```
+
+# CONCLUSION
+
+Ce projet de développement a été une excellente opportunité de consolider mes compétences en architecture Full-Stack. En faisant le choix délibéré de ne pas utiliser de framework frontend lourd (comme React ou Angular), j'ai pu démystifier le fonctionnement interne d'une **Single Page Application (SPA)**, maîtriser la manipulation avancée du DOM en Vanilla JavaScript, et comprendre en profondeur les mécanismes de communication asynchrone client-serveur via l'API Fetch.
+
+Du côté serveur, l'utilisation de **Python avec FastAPI et SQLAlchemy** s'est révélée être un choix particulièrement efficace. Ce stack technologique m'a permis de concevoir une API robuste, fortement typée et sécurisée, tout en simplifiant les interactions complexes avec la base de données PostgreSQL.
+
+Bien que la plateforme soit aujourd'hui pleinement fonctionnelle et réponde aux exigences initiales du TP, plusieurs améliorations pourraient être envisagées pour faire évoluer ce projet vers une application de niveau production :
+
+* ** Éditeur de Texte Riche (WYSIWYG) :** Remplacer le simple champ `textarea` par un éditeur complet (type Quill ou TinyMCE) pour faciliter la mise en page des articles sans avoir à taper des balises HTML à la main.
+* ** Pagination Côté Serveur :** Actuellement, le frontend charge l'intégralité des articles au démarrage. Implémenter une pagination (avec `limit` et `offset`) allégerait la charge réseau et améliorerait les performances si le blog venait à contenir des centaines d'articles.
+* ** Système de Commentaires :** Ajouter une table relationnelle dans la base de données pour permettre aux lecteurs de réagir sous chaque article.
+
+### **Merci d'avoir pris le temps de parcourir ce compte-rendu et d'explorer le code source de ce projet !***
