@@ -332,4 +332,13 @@ Bien que la plateforme soit aujourd'hui pleinement fonctionnelle et réponde aux
 * ** Pagination Côté Serveur :** Actuellement, le frontend charge l'intégralité des articles au démarrage. Implémenter une pagination (avec `limit` et `offset`) allégerait la charge réseau et améliorerait les performances si le blog venait à contenir des centaines d'articles.
 * ** Système de Commentaires :** Ajouter une table relationnelle dans la base de données pour permettre aux lecteurs de réagir sous chaque article.
 
-### **Merci d'avoir pris le temps de parcourir ce compte-rendu et d'explorer le code source de ce projet !***
+### **Merci d'avoir pris le temps de parcourir ce compte-rendu et d'explorer le code source de ce projet !**
+
+## 🚀 Démo en Ligne et Liens Utiles
+
+Le projet est entièrement déployé et accessible en direct. Vous pouvez interagir avec l'interface utilisateur ou tester directement les endpoints via la documentation interactive (Swagger UI) générée par FastAPI :
+
+* 🌐 **Interface Web (Frontend sur Netlify) :** [https://api-project-blog.netlify.app](https://api-project-blog.netlify.app)
+* ⚙️ **Documentation de l'API (Swagger UI) :** [https://blog-api-ultime-version-l485rwox5-urbain238s-projects.vercel.app/docs](https://blog-api-ultime-version-l485rwox5-urbain238s-projects.vercel.app/docs)
+
+*(Note : L'API étant hébergée sur la version gratuite de Vercel, la première requête peut prendre quelques secondes le temps que le serveur sorte de son mode veille).*
